@@ -52,7 +52,7 @@ The **Sentiment Analysis Radar** integrates two complementary NLP techniques:
 
 ## 🎥 Demo Video  
 
-📌 Watch the working demo here: [**Drive Link**](PUT-YOUR-LINK-HERE)  
+📌 Watch the working demo here: [**Drive Link**](https://drive.google.com/drive/folders/1GEfVTNOQWNDtab-es039UN0mTYhK4uC8?usp=sharing)  
 
 ---
 
