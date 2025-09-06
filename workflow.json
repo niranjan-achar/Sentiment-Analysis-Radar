@@ -1,0 +1,198 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        432
+      ],
+      "id": "0d26cee8-c6ab-4d0d-961d-88a585535914",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lCUDZEd5kRbGLrrn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "55f0a76d-3a12-4861-b496-5ad0a7e2e230",
+      "name": "Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "221ea20e-8bd3-46d6-b907-2cd797a6ec85",
+              "name": "chatInput",
+              "value": "=Translate the text \"{{$json.text}}\" \nfrom {{$json.from_lang}}\nto {{$json.to_lang}} and\ngive the translated text along with performing sentimental analysis on the text and determine any of these sentiments mentioned\n{ \nPositive:[ Joy,Happy, Trust, Surprise, Anticipation],\nNegative:[Sadness, Anger, Fear, Disgust], Neutral \n}and also mention the % of sentiment corresponding to the sentiment.\nReturn the result in the following format: \nExample:   \nTranslated text : \"translated_text\",\nSentiment Analysis : Positive, Joy 80%, Trust 20% OR Negative, Sadness 50%, Anger 30%, Fear 20% OR Neutral 0%\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        192
+      ],
+      "id": "9abfbd0f-8e6e-4a15-8bbd-c845877117ab",
+      "name": "set Prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2aaf0d1-b8d5-4353-b168-0db58e034a60",
+              "name": "=from_lang",
+              "value": "={{$json[\"body\"][\"from_lang\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "49cc6155-670d-4ee1-ba06-6bb07e9c4459",
+              "name": "to_lang",
+              "value": "={{$json[\"body\"][\"to_lang\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "4f5a9aa4-c935-46e8-b23b-ef61042c99e4",
+              "name": "text",
+              "value": "={{$json[\"body\"][\"text\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        352
+      ],
+      "id": "82f24962-2a97-4d8d-962a-b034d9b660bc",
+      "name": "Set Values"
+    },
+    {
+      "parameters": {
+        "multipleMethods": "={{ false }}",
+        "httpMethod": "POST",
+        "path": "radar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        192
+      ],
+      "id": "04460159-69fa-48e7-a0af-c1b372f52150",
+      "name": "Webhook",
+      "webhookId": "893e5e23-2e0b-48fb-80c9-dbcbb98c77db"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{$json.output}}\n",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        224
+      ],
+      "id": "f242737d-5c80-475b-a91b-664c00e3e2eb",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set Prompt": {
+      "main": [
+        [
+          {
+            "node": "Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Values": {
+      "main": [
+        [
+          {
+            "node": "set Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56eb2278a2a0c1350b51e266471549cb4cb4a4c018cbdd56f3fc5e1529a703da"
+  }
+}
